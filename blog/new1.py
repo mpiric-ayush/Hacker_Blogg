@@ -25,7 +25,8 @@ from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
 from langchain_core.messages import SystemMessage, HumanMessage
 
 load_dotenv()
-
+import os
+   os.environ["GOOGLE_API_KEY"] = "your-api-key-here"
 # ───────────────────────────────────────────────
 #          TWO MODELS — Gemini plans, Groq writes
 # ───────────────────────────────────────────────
@@ -34,7 +35,7 @@ load_dotenv()
 # created inside _try_models_structured / _try_models_raw so they can swap
 # model names on 404.
 gemini = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash-lite",          # ← valid stable model
+    model="gemini-1.5-flash",          # ← valid stable model
     temperature=0.7
 )
 
@@ -151,7 +152,7 @@ def _candidate_model_names() -> list[str]:
             warnings.warn(f"Ignoring invalid GEMINI_MODEL value: {env!r}", stacklevel=2)
 
     # Explicit tuple/list of valid models — do NOT use a single string here
-    for m in ("gemini-2.5-flash-lite", "gemini-2.0-pro", "gemini-2.5-pro"):
+    for m in ("gemini-1.5-flash", "gemini-2.0-pro", "gemini-2.5-pro"):
         if m not in cands:
             cands.append(m)
 
