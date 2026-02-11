@@ -1,0 +1,41 @@
+# render.yaml
+# Blueprint for Render.com – deploys your LangGraph + Streamlit blog writer app
+
+services:
+  - type: web
+    name: blog-writer-agent # ← choose a nice name
+    env: python
+    plan: starter # free has sleep + limited resources; starter ~$7/mo recommended
+    region: oregon # or frankfurt, singapore, ohio – choose closest to India
+    branch: main # change if your default branch is different
+    runtime: python
+    buildCommand: |
+      pip install --upgrade pip && \
+      pip install -r requirements.txt
+    startCommand: |
+      streamlit run new2.py --server.port $PORT http://localhost:8501/ true
+    healthCheckPath: /healthz # Streamlit has /_stcore/health, but /healthz often works too
+    autoDeploy: true # auto deploy on git push to main
+    envVars:
+      # Very important – your app uses several APIs
+      - key: GOOGLE_API_KEY
+        sync: false # ← you will set this manually in Render dashboard
+      - key: GROQ_API_KEY
+        sync: false # ← required for ChatGroq
+      - key: TAVILY_API_KEY
+        sync: false # ← required for research (Tavily search)
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash # optional override – safer than gemini-2.5-flash-lite if unstable
+      - key: PYTHONUNBUFFERED
+        value: "1" # better logging
+      - key: STREAMLIT_SERVER_ENABLE_CORS
+        value: "false" # optional – security
+      - key: STREAMLIT_BROWSER_GATHER_USAGE_STATS
+        value: "false" # optional – privacy
+
+
+# Optional: if you later want a small persistent disk for storing generated .md files
+# disks:
+#   - name: blogs
+#     mountPath: "/opt/render/project/src/blogs"
+#     sizeGB: 1
