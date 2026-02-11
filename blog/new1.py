@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import operator
 import os
 import re
@@ -8,8 +9,10 @@ from datetime import date, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TypedDict, List, Optional, Literal, Annotated, Callable
+
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
+
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Send
 
@@ -17,24 +20,29 @@ from langgraph.types import Send
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
+
 from langchain_core.messages import SystemMessage, HumanMessage
 
 load_dotenv()
-import os
-from langchain_google_genai import ChatGoogleGenerativeAI
-# ... other imports ...
 
-# No indentation here ↓
-os.environ["GOOGLE_API_KEY"] = "AIzaSyCj5wBKkVxW2vsvY5zqQ159lX87wZHa-C8"
-
+# ───────────────────────────────────────────────
+#          TWO MODELS — Gemini plans, Groq writes
+# ───────────────────────────────────────────────
+# Primary instance – used only for attribute look-ups (temperature /
+# max_output_tokens) in the retry helpers.  Actual per-call instances are
+# created inside _try_models_structured / _try_models_raw so they can swap
+# model names on 404.
 gemini = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
+    model="gemini-2.5-flash-lite",          # ← valid stable model
     temperature=0.7
 )
+
 groq = ChatGroq(
     model="llama-3.3-70b-versatile",
     temperature=0.7
 )
+
+
 # -----------------------------
 # 1) Schemas
 # -----------------------------
@@ -142,7 +150,7 @@ def _candidate_model_names() -> list[str]:
             warnings.warn(f"Ignoring invalid GEMINI_MODEL value: {env!r}", stacklevel=2)
 
     # Explicit tuple/list of valid models — do NOT use a single string here
-    for m in ("gemini-1.5-flash", "gemini-2.0-pro", "gemini-2.5-pro"):
+    for m in ("gemini-2.5-flash-lite", "gemini-2.0-pro", "gemini-1.5-pro"):
         if m not in cands:
             cands.append(m)
 
@@ -351,11 +359,12 @@ ORCH_SYSTEM = """You are a senior technical writer and SEO-focused blog creator.
 You MUST follow this exact Article Format when creating the plan:
 
 Article Format (STRICT ORDER):
-1. Introduction (must mention the primary keyword naturally)
-2. Definition (clearly define the topic in simple language)
-3. Main Content Sections (optional, only if needed)
-4. Conclusion
-5. FAQs (3–5 questions with short answers) 
+1. Main Title
+2. Introduction (must mention the primary keyword naturally)
+3. Definition (clearly define the topic in simple language)
+4. Main Content Sections (optional, only if needed)
+5. Conclusion
+6. FAQs (3–5 questions with short answers)
 
 Rules:
 - Each section MUST be a separate Task.
@@ -365,13 +374,12 @@ Rules:
 - Definition must be simple and beginner-friendly.
 - Conclusion must summarize and restate importance.
 - No extra sections outside this structure.
--write in headline :<h3> and answer:<h5> font size 
 
 Requirements:
 - 5–9 tasks total.
 - Each task must include:
-- goal
-- 3–6 bullets
+  - goal
+  - 3–6 bullets
 
 TOTAL WORD COUNT RULE:
 - The total sum of all task.target_words MUST be approximately 2500 words (+/-5%).
@@ -604,18 +612,18 @@ reducer_graph.add_edge("merge_content", END)
 reducer_subgraph = reducer_graph.compile()
 
 # Main graph
-graph = StateGraph(State)
-graph.add_node("router", router_node)
-graph.add_node("research", research_node)
-graph.add_node("orchestrator", orchestrator_node)
-graph.add_node("worker", worker_node)
-graph.add_node("reducer", reducer_subgraph)
+g = StateGraph(State)
+g.add_node("router", router_node)
+g.add_node("research", research_node)
+g.add_node("orchestrator", orchestrator_node)
+g.add_node("worker", worker_node)
+g.add_node("reducer", reducer_subgraph)
 
-graph.add_edge(START, "router")
-graph.add_conditional_edges("router", route_next, {"research": "research", "orchestrator": "orchestrator"})
-graph.add_edge("research", "orchestrator")
-graph.add_conditional_edges("orchestrator", fanout, ["worker"])
-graph.add_edge("worker", "reducer")
-graph.add_edge("reducer", END)
+g.add_edge(START, "router")
+g.add_conditional_edges("router", route_next, {"research": "research", "orchestrator": "orchestrator"})
+g.add_edge("research", "orchestrator")
+g.add_conditional_edges("orchestrator", fanout, ["worker"])
+g.add_edge("worker", "reducer")
+g.add_edge("reducer", END)
 
-app = graph.compile()
+app = g.compile()
