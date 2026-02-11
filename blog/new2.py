@@ -10,11 +10,15 @@ from typing import Any, Dict, Iterator, Tuple
 
 import pandas as pd
 import streamlit as st
-
 # Make sure this import points to your graph file
-from new1 import app  # ← your LangGraph compiled app
+# ← your LangGraph compiled app
 
-
+try:
+    from new1 import app
+except Exception as e:
+    print(f"Import error: {e}")
+    import traceback
+    traceback.print_exc()
 # -----------------------------
 # Helpers
 # -----------------------------
