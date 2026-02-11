@@ -1,19 +1,15 @@
 from __future__ import annotations
-
 import operator
 import os
 import re
-
 import time
 import warnings
 from datetime import date, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TypedDict, List, Optional, Literal, Annotated, Callable
-
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
-
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Send
 
@@ -21,7 +17,6 @@ from langgraph.types import Send
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
-
 from langchain_core.messages import SystemMessage, HumanMessage
 
 load_dotenv()
@@ -613,18 +608,18 @@ reducer_graph.add_edge("merge_content", END)
 reducer_subgraph = reducer_graph.compile()
 
 # Main graph
-g = StateGraph(State)
-g.add_node("router", router_node)
-g.add_node("research", research_node)
-g.add_node("orchestrator", orchestrator_node)
-g.add_node("worker", worker_node)
-g.add_node("reducer", reducer_subgraph)
+graph = StateGraph(State)
+graph.add_node("router", router_node)
+graph.add_node("research", research_node)
+graph.add_node("orchestrator", orchestrator_node)
+graph.add_node("worker", worker_node)
+graph.add_node("reducer", reducer_subgraph)
 
-g.add_edge(START, "router")
-g.add_conditional_edges("router", route_next, {"research": "research", "orchestrator": "orchestrator"})
-g.add_edge("research", "orchestrator")
-g.add_conditional_edges("orchestrator", fanout, ["worker"])
-g.add_edge("worker", "reducer")
-g.add_edge("reducer", END)
+graph.add_edge(START, "router")
+graph.add_conditional_edges("router", route_next, {"research": "research", "orchestrator": "orchestrator"})
+graph.add_edge("research", "orchestrator")
+graph.add_conditional_edges("orchestrator", fanout, ["worker"])
+graph.add_edge("worker", "reducer")
+graph.add_edge("reducer", END)
 
-app = g.compile()
+app = graph.compile()
