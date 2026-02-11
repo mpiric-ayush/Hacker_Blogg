@@ -12,3 +12,4 @@ python-dotenv
 pydantic
 langchain-community>=0.3.0
 langchain-tavily>=0.1.0                       
+google-generativeai
