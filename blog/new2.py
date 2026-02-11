@@ -11,15 +11,15 @@ from typing import Any, Dict, Iterator, Tuple
 import pandas as pd
 import streamlit as st
 # Make sure this import points to your graph file
-# ← your LangGraph compiled app
+from new1 import app# ← your LangGraph compiled app
 
-try:
+"""try:
     from new1 import app
 except Exception as e:
     print(f"Import error: {e}")
     import traceback
     traceback.print_exc()
-# -----------------------------
+"""# -----------------------------
 # Helpers
 # -----------------------------
 def safe_slug(title: str) -> str:
