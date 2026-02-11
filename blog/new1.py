@@ -30,7 +30,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCj5wBKkVxW2vsvY5zqQ159lX87wZHa-C8"
 
 gemini = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
+    model="gemini-2.5-flash",
     temperature=0.7
 )
 load_dotenv()
@@ -161,7 +161,7 @@ def _candidate_model_names() -> list[str]:
             warnings.warn(f"Ignoring invalid GEMINI_MODEL value: {env!r}", stacklevel=2)
 
     # Explicit tuple/list of valid models — do NOT use a single string here
-    for m in ("gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp"):
+    for m in ("gemini-2.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp"):
         if m not in cands:
             cands.append(m)
 
