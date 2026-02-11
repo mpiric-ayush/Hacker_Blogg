@@ -26,7 +26,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 
 load_dotenv()
 import os
-   os.environ["GOOGLE_API_KEY"] = "your-api-key-here"
+   os.environ["GOOGLE_API_KEY"] = "AIzaSyCj5wBKkVxW2vsvY5zqQ159lX87wZHa-C8"
 # ───────────────────────────────────────────────
 #          TWO MODELS — Gemini plans, Groq writes
 # ───────────────────────────────────────────────
