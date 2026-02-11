@@ -22,7 +22,17 @@ from langchain_groq import ChatGroq
 from langchain_google_genai.chat_models import ChatGoogleGenerativeAIError
 
 from langchain_core.messages import SystemMessage, HumanMessage
+import os
+from langchain_google_genai import ChatGoogleGenerativeAI
+# ... other imports ...
 
+# No indentation here ↓
+os.environ["GOOGLE_API_KEY"] = "AIzaSyCj5wBKkVxW2vsvY5zqQ159lX87wZHa-C8"
+
+gemini = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash",
+    temperature=0.7
+)
 load_dotenv()
 
 # ───────────────────────────────────────────────
@@ -32,6 +42,7 @@ load_dotenv()
 # max_output_tokens) in the retry helpers.  Actual per-call instances are
 # created inside _try_models_structured / _try_models_raw so they can swap
 # model names on 404.
+"""
 gemini = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash",          # ← valid stable model
     temperature=0.7
@@ -41,7 +52,7 @@ groq = ChatGroq(
     model="llama-3.3-70b-versatile",
     temperature=0.7
 )
-
+"""
 
 # -----------------------------
 # 1) Schemas
