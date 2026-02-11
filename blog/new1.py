@@ -31,10 +31,6 @@ gemini = ChatGoogleGenerativeAI(
     model="gemini-1.5-flash",
     temperature=0.7
 )
-
-# ... rest of your code ...
-app = graph.compile()
-
 groq = ChatGroq(
     model="llama-3.3-70b-versatile",
     temperature=0.7
